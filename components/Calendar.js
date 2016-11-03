@@ -14,6 +14,7 @@ import styles from './styles';
 
 const DEVICE_WIDTH = Dimensions.get('window').width;
 const VIEW_INDEX = 2;
+const DATE_FORMAT = 'YYYY-MM-DD';
 
 export default class Calendar extends Component {
 
@@ -76,7 +77,7 @@ export default class Calendar extends Component {
   componentDidUpdate() {
     this.scrollToItem(VIEW_INDEX);
   }
-  
+
   componentWillReceiveProps(props) {
     if (props.selectedDate) {
       this.setState({selectedMoment: props.selectedDate});
@@ -162,7 +163,8 @@ export default class Calendar extends Component {
       renderIndex = 0,
       weekRows = [],
       days = [],
-      startOfArgMonthMoment = argMoment.startOf('month');
+      startOfArgMonthMoment = argMoment.startOf('month'),
+      hasEnabledCallback = 'function' === typeof this.props.onDateIsEnabled;
 
     const
       selectedMoment = moment(this.state.selectedMoment),
@@ -184,17 +186,23 @@ export default class Calendar extends Component {
       const isoWeekday = (renderIndex + weekStart) % 7;
 
       if (dayIndex >= 0 && dayIndex < argMonthDaysCount) {
+        const day = moment(startOfArgMonthMoment).set('date', dayIndex + 1);
+        const isEnabled = hasEnabledCallback
+          ? this.props.onDateIsEnabled(moment(day).format(DATE_FORMAT))
+          : true;
+
         days.push((
           <Day
             startOfMonth={startOfArgMonthMoment}
             isWeekend={isoWeekday === 0 || isoWeekday === 6}
             key={`${renderIndex}`}
             onPress={() => {
-              this.selectDate(moment(startOfArgMonthMoment).set('date', dayIndex + 1));
+              this.selectDate(day);
             }}
             caption={`${dayIndex + 1}`}
             isToday={argMonthIsToday && (dayIndex === todayIndex)}
             isSelected={selectedMonthIsArg && (dayIndex === selectedIndex)}
+            isEnabled={isEnabled}
             event={events && events[dayIndex]}
             showEventIndicators={this.props.showEventIndicators}
             customStyle={this.props.customStyle}
