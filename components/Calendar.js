@@ -139,7 +139,7 @@ export default class Calendar extends Component {
 
   scrollToItem(itemIndex) {
     const scrollToX = itemIndex * this.props.width;
-    if (this.props.scrollEnabled) {
+    if (this.props.scrollEnabled && this._calendar) {
       this._calendar.scrollTo({ y: 0, x: scrollToX, animated: false });
     }
   }
