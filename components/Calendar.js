@@ -165,6 +165,7 @@ export default class Calendar extends Component {
       days = [],
       startOfArgMonthMoment = argMoment.startOf('month'),
       hasEnabledCallback = 'function' === typeof this.props.onDateIsEnabled;
+      hasCustomStyleCallback = 'function' === typeof this.props.onDateCustomStyle;
 
     const
       selectedMoment = moment(this.state.selectedMoment),
@@ -187,9 +188,16 @@ export default class Calendar extends Component {
 
       if (dayIndex >= 0 && dayIndex < argMonthDaysCount) {
         const day = moment(startOfArgMonthMoment).set('date', dayIndex + 1);
+        const formattedDate = moment(day).format(DATE_FORMAT)
         const isEnabled = hasEnabledCallback
-          ? this.props.onDateIsEnabled(moment(day).format(DATE_FORMAT))
+          ? this.props.onDateIsEnabled(formattedDate)
           : true;
+
+        const customStyle = hasCustomStyleCallback
+          ? this.props.onDateCustomStyle(formattedDate)
+          : undefined;
+
+        const style = Object.assign({}, this.props.customStyle || {}, customStyle || {});
 
         days.push((
           <Day
@@ -205,7 +213,7 @@ export default class Calendar extends Component {
             isEnabled={isEnabled}
             event={events && events[dayIndex]}
             showEventIndicators={this.props.showEventIndicators}
-            customStyle={this.props.customStyle}
+            customStyle={style}
           />
         ));
       } else {
